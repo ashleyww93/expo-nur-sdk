@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-nur-sdk": ["../src/index"],
+      "expo-nur-sdk/*": ["../src/*"]
+    }
+  }
+}
