@@ -41,3 +41,9 @@ android {
     abortOnError false
   }
 }
+
+
+dependencies {
+  //NurApi.jar Java library for RFID and transport operations.
+  implementation files('libs/NurApi/NurApi.jar')
+}

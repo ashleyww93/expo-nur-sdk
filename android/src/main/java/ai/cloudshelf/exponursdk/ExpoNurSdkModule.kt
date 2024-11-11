@@ -1,5 +1,6 @@
 package ai.cloudshelf.exponursdk
 
+import androidx.core.os.bundleOf
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -13,35 +14,29 @@ class ExpoNurSdkModule : Module() {
     // The module will be accessible from `requireNativeModule('ExpoNurSdk')` in JavaScript.
     Name("ExpoNurSdk")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
-
     // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    Events("onDeviceConnectionChanged")
 
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") {
       "Hello world! 👋"
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
+    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
+    Function("fireEventDevice") {
+      this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to true))
     }
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ExpoNurSdkView::class) {
-      // Defines a setter for the `name` prop.
-      Prop("name") { view: ExpoNurSdkView, prop: String ->
-        println(prop)
-      }
+    Function("add") {
+      return@Function Helper.getInstance().add();
     }
+
+    Function("helperTest") {
+      return@Function Helper.getInstance().size();
+    }
+    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
+    // Function("fireEventTags") {
+    //   this@ExpoNurSdkModule.sendEvent("onTagsFoundChanged", bundleOf("isConnected" to true))
+    // }
   }
 }
