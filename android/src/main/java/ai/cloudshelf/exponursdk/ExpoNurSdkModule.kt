@@ -1,6 +1,10 @@
 package ai.cloudshelf.exponursdk
 
+
 import androidx.core.os.bundleOf
+
+import ai.cloudshelf.exponursdk.RFIDTag;
+
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -15,28 +19,85 @@ class ExpoNurSdkModule : Module() {
     Name("ExpoNurSdk")
 
     // Defines event names that the module can send to JavaScript.
-    Events("onDeviceConnectionChanged")
+    Events("onDeviceScanFinished", "onDeviceConnectionChanged", "onTagsFoundChanged")
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("fireEventDevice") {
-      this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to true))
-    }
-
-    Function("add") {
-      return@Function Helper.getInstance().add();
-    }
-
-    Function("helperTest") {
-      return@Function Helper.getInstance().size();
-    }
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    // Function("fireEventTags") {
-    //   this@ExpoNurSdkModule.sendEvent("onTagsFoundChanged", bundleOf("isConnected" to true))
+    // Function("fireEventDevice") {
+    //   this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to true))
     // }
+
+    //Real functions
+    Function("initialize") { deviceSpec: String? ->
+      val activity = appContext.currentActivity;
+
+      if (activity == null) {
+        return@Function false
+      } else {
+        return@Function Helper.getInstance().initialize(deviceSpec, activity, object : EventCallbacks {
+          override fun onDeviceScanComplete(deviceList: List<NurDeviceSpec>) {
+            val processedDeviceList = deviceList.map { device ->
+              device.getSpec()
+            }
+          
+            this@ExpoNurSdkModule.sendEvent("onDeviceScanFinished", bundleOf("foundDevices" to processedDeviceList))
+          }
+
+          override fun onConnectionStatusChanged(isConnected: Boolean) {
+            this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to isConnected))
+          }
+
+          override fun onTagsDiscovered(tagsList: kotlin.collections.List<RFIDTag>) {
+            val processedTagsList = tagsList.map { tag ->
+              kotlin.collections.mapOf(
+                "isGS1Encoded" to tag.getIsGS1Encoded(),
+                "gS1String" to tag.getGS1String(),
+                "epc" to tag.getEpc(),
+                "rssi" to tag.getRssi().toString(),
+                "tid" to tag.getTid(),
+                "usr" to tag.getUsr(),
+                "usrSupported" to tag.getUsrSupported()
+              )
+            }
+
+            this@ExpoNurSdkModule.sendEvent("onTagsFoundChanged", bundleOf("tags" to processedTagsList))
+          }
+        })
+      } 
+    }
+
+    Function("terminate") {
+      return@Function Helper.getInstance().terminate();
+    }
+
+    Function("scanDevices") {
+      return@Function Helper.getInstance().scanDevices();
+    }
+
+    Function("connect") { deviceSpec: String ->
+      return@Function Helper.getInstance().connect(deviceSpec);
+    }
+
+    Function("disconnect") {
+      return@Function Helper.getInstance().disconnect();
+    }
+
+    Function("traceContinuousStart") {
+      return@Function Helper.getInstance().traceContinuousStart();
+    }
+
+    Function("traceContinuousStop") {
+      return@Function Helper.getInstance().traceContinuousStop();
+    }
+
+    Function("traceOnce") { clearPreviousTags: Boolean ->
+      return@Function Helper.getInstance().traceOnce(clearPreviousTags);
+    }
+
+    Function("resetSeenTags") {
+      return@Function Helper.getInstance().clearSeenTags();
+    }
+    
+    Function("connectionStatus") {
+      return@Function Helper.getInstance().connectionStatus();
+    }
   }
 }

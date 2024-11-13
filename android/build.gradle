@@ -46,4 +46,7 @@ android {
 dependencies {
   //NurApi.jar Java library for RFID and transport operations.
   implementation files('libs/NurApi/NurApi.jar')
+  implementation files('libs/TDTLib/TDTLib.jar')
+  implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
+  implementation 'no.nordicsemi.android:dfu:1.9.0'
 }
