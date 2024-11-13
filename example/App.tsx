@@ -150,9 +150,9 @@ export default function App() {
                 }}
               />
             </View>
-            <View style={{ maxHeight: 200, borderWidth: 1, borderColor: 'gray',  marginBottom: 10, width: '100%' }}>
+            <View style={{ borderWidth: 1, borderColor: 'gray',  marginBottom: 10, width: '100%', maxHeight: 300 }}>
              <Text style={{ padding: 10, fontWeight: 'bold', textAlign:'center' }}>
-              Found Tags
+              Found Tags ({tagsFound.length})
               {"\n"}
               Last Tags Event: {lastTagsEvent ? lastTagsEvent.toLocaleString() : 'No event recorded'}
               </Text>
@@ -175,6 +175,7 @@ export default function App() {
                   </Text>
                 </TouchableOpacity>
               )}
+             
             />
             </View>
           </View>
@@ -188,6 +189,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 10,
+    maxHeight: '100%',
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'flex-start',
