@@ -46,7 +46,7 @@ export default function App() {
       sub2.remove();
       sub3.remove();
     }
-  }, [expoNurSdkInitalized]);
+  }, [expoNurSdkInitalized, isConnected, availableDevices]);
 
   const handleDeviceChange = (device: string) => {
     if(ExpoNurSdk.connectionStatus() === 'connected') {
