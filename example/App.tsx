@@ -2,19 +2,24 @@ import { Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'reac
 
 import * as ExpoNurSdk from 'expo-nur-sdk';
 import { useEffect, useState } from 'react';
+import React from 'react';
 
 export default function App() {
   const [expoNurSdkInitalized,setExpoNurSdkInitalized] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [lastConnectedEvent, setLastConnectedEvent]= useState<Date | undefined>(undefined);
   const [availableDevices, setAvailableDevices] = useState<string[]>([]);
+  const [lastAvailableDevicesEvent, setLastAvailableDevicesEvent] = useState<Date | undefined>(undefined);
   const [deviceToUse, setDeviceToUse] = useState<string | undefined>(undefined);
   const [tagsFound, setTagsFound] = useState<ExpoNurSdk.RFIDTag[]>([]);
+  const [lastTagsEvent, setLastTagsEvent] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     const sub = ExpoNurSdk.addDeviceConnectionEventListener((event) => {
       console.log('device connection event', event);
       if (event.isConnected !== isConnected) {
         setIsConnected(event.isConnected);
+        setLastConnectedEvent(new Date());
       }
     });
 
@@ -22,12 +27,14 @@ export default function App() {
       console.log('device scan event', event);
       if (JSON.stringify(event.foundDevices) !== JSON.stringify(availableDevices)) {
         setAvailableDevices(event.foundDevices);
+        setLastAvailableDevicesEvent(new Date());
       }
     })
 
     const sub3 = ExpoNurSdk.addTagsFoundEventListener((event) => {
       console.log('tag event', event);
       setTagsFound(event.tags);
+      setLastTagsEvent(new Date());
     })
 
     if(!expoNurSdkInitalized) {
@@ -49,123 +56,140 @@ export default function App() {
     ExpoNurSdk.connect(device);
   }
 
-  if(!expoNurSdkInitalized) {
-    return <View style={styles.container}>
-      <Text>Unable to initialize Expo Nur SDK</Text>
-    </View>
-  }
-
   return (
     <View style={styles.container}>
-      <Button
-        title="Terminate"
-        onPress={() => {
-          ExpoNurSdk.terminate();
-        }}
-      />
-      <Text>{isConnected ? "CONNECTED" : "NOT CONNECTED"}</Text>
-      <Button
-        title="Scan Devices"
-        onPress={() => {
-          ExpoNurSdk.scanDevices();
-        }}
-      />
-      
-
-      <View style={{ maxHeight: 200 }}>
-        <FlatList
-          data={availableDevices}
-          keyExtractor={(item) => item}
-          ListEmptyComponent={() => (
-            <Text style={{ padding: 10 }}>No devices </Text>
-          )}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleDeviceChange(item)}>
-              <Text style={{ 
-                padding: 10, 
-                backgroundColor: item === deviceToUse ? 'lightblue' : 'white' 
-              }}>
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between', width: '100%' }}>
+        <Text>Expo SDK Initialized: {expoNurSdkInitalized ? "Yes" : "No"}</Text>
+        <Button
+          title="Terminate SDK"
+          onPress={() => {
+            ExpoNurSdk.terminate();
+            setExpoNurSdkInitalized(false);
+          }}
         />
       </View>
- <Button
-        title="Read Single Tag"
-        onPress={() => {
-          ExpoNurSdk.traceOnce(false);
-        }}
-      />
-       <Button
-        title="Read Single Tag (clear previous)"
-        onPress={() => {
-          ExpoNurSdk.traceOnce(true);
-        }}
-      />
-
-<Button
-        title="START Read Continuous"
-        onPress={() => {
-          ExpoNurSdk.traceContinuousStart();
-        }}
-      />
-      <Button
-        title="STOP Read Continuous"
-        onPress={() => {
-          ExpoNurSdk.traceContinuousStop();
-        }}
-      />
+      {expoNurSdkInitalized && (
+        <>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10,  justifyContent: 'space-between', width: '100%' }}>
+            <Text>
+              Device Connection Status: {isConnected ? "Connected" : "Disconnected"}
+              {"\n"}
+              Last Connection Event: {lastConnectedEvent ? lastConnectedEvent.toLocaleString() : 'No event recorded'}
+              </Text>
             <Button
-        title="Read Continuous - CLEAR"
-        onPress={() => {
-          ExpoNurSdk.resetSeenTags();
-        }}
-      />
-        <View style={{ maxHeight: 200 }}>
-        <FlatList
-          data={tagsFound}
-          keyExtractor={(item) => item.epc}
-          ListEmptyComponent={() => (
-            <Text style={{ padding: 10 }}>No tags</Text>
-          )}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => {}}>
-              <Text style={{ 
-                padding: 10, 
-                }}>
-                EPC: {item.epc}{"\n"}
-                RSSI: {item.rssi}{"\n"}
-                TID: {item.tid}{"\n"}
-                USR: {item.usrSupported && item.usr ? item.usr : 'Not Supported'}
+              title="Scan for Devices"
+              onPress={() => {
+                ExpoNurSdk.scanDevices();
+              }}
+            />
+          </View>
+          <View style={{ maxHeight: 200, borderWidth: 1, borderColor: 'gray', marginBottom: 10, width: '100%' }}>
+            <Text style={{ padding: 10, fontWeight: 'bold', textAlign:'center' }}>
+              Available Devices
+              {"\n"}
+              Last Device Event: {lastAvailableDevicesEvent ? lastAvailableDevicesEvent.toLocaleString() : 'No event recorded'}
               </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-      
-      {/* <Text>Helper Test: {helperTestValue}</Text>
-      <Button
-        title="Size"
-        onPress={() => {
-          setHelperTestValue(ExpoNurSdk.helperTest());
-        }}
-      />
-       <Button
-        title="add"
-        onPress={() => {
-          setHelperTestValue(ExpoNurSdk.add());
-        }}
-      /> */}
+            <FlatList
+              data={availableDevices}
+              keyExtractor={(item) => item}
+              ListEmptyComponent={() => (
+                <Text style={{ padding: 10, textAlign: 'center' }}>
+                  No devices 
+                  (todo, scanning status)
+                </Text>
+              )}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => handleDeviceChange(item)} style={{ borderWidth: 1, borderColor: 'gray', borderRadius: 5, margin: 5 }}>
+                  <Text style={{ 
+                    padding: 10, 
+                    backgroundColor: item === deviceToUse ? 'lightblue' : 'white',
+                    textAlign: 'center'
+                  }}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              style={{ flexGrow: 0 }}
+            />
+          </View>
+          <View style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 10, gap: 10, width: '100%'  }}>
+            <Text style={{ fontWeight: 'bold', textAlign:'center' }}>Controls</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center',  gap: 10 }}>
+              <Button
+                title="Read Single Tag"
+                onPress={() => {
+                  ExpoNurSdk.traceOnce(false);
+                }}
+              />
+              <Button
+                title="Read Single Tag (clear previous)"
+                onPress={() => {
+                  ExpoNurSdk.traceOnce(true);
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Button
+                title="Start Continuous Tag Reading"
+                onPress={() => {
+                  ExpoNurSdk.traceContinuousStart();
+                }}
+              />
+              <Button
+                title="Stop Continuous Tag Reading"
+                onPress={() => {
+                  ExpoNurSdk.traceContinuousStop();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Button
+                title="Clear Previously Seen Tags"
+                onPress={() => {
+                  ExpoNurSdk.resetSeenTags();
+                }}
+              />
+            </View>
+            <View style={{ maxHeight: 200, borderWidth: 1, borderColor: 'gray',  marginBottom: 10, width: '100%' }}>
+             <Text style={{ padding: 10, fontWeight: 'bold', textAlign:'center' }}>
+              Found Tags
+              {"\n"}
+              Last Tags Event: {lastTagsEvent ? lastTagsEvent.toLocaleString() : 'No event recorded'}
+              </Text>
+             <FlatList
+              data={tagsFound}
+              keyExtractor={(item) => item.epc}
+              ListEmptyComponent={() => (
+                <Text style={{ padding: 10, textAlign:'center' }}>No tags discovered</Text>
+              )}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => {}} style={{ borderWidth: 1, borderColor: 'gray', borderRadius: 5, margin: 5 }}>
+                  <Text style={{ 
+                    padding: 10, 
+                    }}>
+                      GS1: {item.isGS1Encoded && item.gS1String ? item.gS1String : 'Not GS1 Encoded'}{"\n"}
+                    EPC: {item.epc}{"\n"}
+                    RSSI: {item.rssi}{"\n"}
+                    TID: {item.tid}{"\n"}
+                    USR: {item.usrSupported && item.usr ? item.usr : 'Not Supported'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+            </View>
+          </View>
+        </>
+      )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    margin: 10,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
 });
