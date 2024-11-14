@@ -73,8 +73,8 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
         });
     }
 
-    public void sendOnDeviceScanComplete(List<NurDeviceSpec> deviceList) {
-        this.mCallbacks.onDeviceScanComplete(deviceList);
+    public void sendOnDeviceScanStatusUpdate() {
+        this.mCallbacks.onDeviceScanStatusUpdate(this.mDeviceList, this.mDeviceScanning);
     }
 
     public void sendOnConnectionStatusChanged(boolean isConnected) {
@@ -238,17 +238,19 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
         debugToast("onDeviceScanStarted");
         this.mDeviceList.clear();
         this.mDeviceScanning = true;
+        this.sendOnDeviceScanStatusUpdate();
     }
 
     public void onDeviceFound(NurDeviceSpec device){
         debugToast("onDeviceFound: " + device.getSpec());
         this.mDeviceList.add(device);
+        this.sendOnDeviceScanStatusUpdate();
     }
 
     public void onScanFinished(){
         debugToast("onScanFinished");
         this.mDeviceScanning = false;
-        this.sendOnDeviceScanComplete(this.mDeviceList);
+        this.sendOnDeviceScanStatusUpdate();
     }
 
     public void clearSeenTags() {

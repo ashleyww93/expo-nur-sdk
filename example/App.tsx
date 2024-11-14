@@ -10,6 +10,7 @@ export default function App() {
   const [lastConnectedEvent, setLastConnectedEvent]= useState<Date | undefined>(undefined);
   const [availableDevices, setAvailableDevices] = useState<string[]>([]);
   const [lastAvailableDevicesEvent, setLastAvailableDevicesEvent] = useState<Date | undefined>(undefined);
+  const [isScanningDevices, setIsScanningDevices] = useState<boolean>(false);
   const [deviceToUse, setDeviceToUse] = useState<string | undefined>(undefined);
   const [tagsFound, setTagsFound] = useState<ExpoNurSdk.RFIDTag[]>([]);
   const [lastTagsEvent, setLastTagsEvent] = useState<Date | undefined>(undefined);
@@ -23,11 +24,15 @@ export default function App() {
       }
     });
 
-    const sub2 = ExpoNurSdk.addDeviceScanFinishedListener((event) => {
+    const sub2 = ExpoNurSdk.addDeviceScanStatusUpdateListener((event) => {
       console.log('device scan event', event);
       if (JSON.stringify(event.foundDevices) !== JSON.stringify(availableDevices)) {
         setAvailableDevices(event.foundDevices);
         setLastAvailableDevicesEvent(new Date());
+      }
+
+      if(event.isScanning !== isScanningDevices) {
+        setIsScanningDevices(event.isScanning)
       }
     })
 
@@ -89,7 +94,7 @@ export default function App() {
           </View>
           <View style={{ maxHeight: 200, borderWidth: 1, borderColor: 'gray', marginBottom: 10, width: '100%' }}>
             <Text style={{ padding: 10, fontWeight: 'bold', textAlign:'center' }}>
-              Available Devices
+              Available Devices {isScanningDevices && "(Scanning for devices)"}
               {"\n"}
               Last Device Event: {lastAvailableDevicesEvent ? lastAvailableDevicesEvent.toLocaleString() : 'No event recorded'}
               </Text>
@@ -99,7 +104,6 @@ export default function App() {
               ListEmptyComponent={() => (
                 <Text style={{ padding: 10, textAlign: 'center' }}>
                   No devices 
-                  (todo, scanning status)
                 </Text>
               )}
               renderItem={({ item }) => (

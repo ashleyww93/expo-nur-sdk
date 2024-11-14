@@ -19,7 +19,7 @@ class ExpoNurSdkModule : Module() {
     Name("ExpoNurSdk")
 
     // Defines event names that the module can send to JavaScript.
-    Events("onDeviceScanFinished", "onDeviceConnectionChanged", "onTagsFoundChanged")
+    Events("onDeviceScanStatusUpdate", "onDeviceConnectionChanged", "onTagsFoundChanged")
 
     // Function("fireEventDevice") {
     //   this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to true))
@@ -33,12 +33,14 @@ class ExpoNurSdkModule : Module() {
         return@Function false
       } else {
         return@Function Helper.getInstance().initialize(deviceSpec, activity, object : EventCallbacks {
-          override fun onDeviceScanComplete(deviceList: List<NurDeviceSpec>) {
+          override fun onDeviceScanStatusUpdate(deviceList: List<NurDeviceSpec>, isScanning: Boolean) {
             val processedDeviceList = deviceList.map { device ->
               device.getSpec()
             }
           
-            this@ExpoNurSdkModule.sendEvent("onDeviceScanFinished", bundleOf("foundDevices" to processedDeviceList))
+            this@ExpoNurSdkModule.sendEvent("onDeviceScanStatusUpdate",  bundleOf(
+              "foundDevices" to processedDeviceList,
+              "isScanning" to isScanning))
           }
 
           override fun onConnectionStatusChanged(isConnected: Boolean) {

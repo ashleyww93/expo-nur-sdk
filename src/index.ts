@@ -7,8 +7,9 @@ export interface DeviceConnectionPayload {
   isConnected: boolean;
 }
 
-export interface DeviceScanFinishedPayload {
+export interface DeviceScanStatusUpdatePayload {
   foundDevices: string[]
+  isScanning: boolean,
 }
 
 export interface RFIDTag {
@@ -30,8 +31,8 @@ export function addDeviceConnectionEventListener(listener: (event: DeviceConnect
   return emitter.addListener<DeviceConnectionPayload>('onDeviceConnectionChanged', listener);
 }
 
-export function addDeviceScanFinishedListener(listener: (event: DeviceScanFinishedPayload) => void): Subscription {
-  return emitter.addListener<DeviceScanFinishedPayload>('onDeviceScanFinished', listener);
+export function addDeviceScanStatusUpdateListener(listener: (event: DeviceScanStatusUpdatePayload) => void): Subscription {
+  return emitter.addListener<DeviceScanStatusUpdatePayload>('onDeviceScanStatusUpdate', listener);
 }
 
 export function addTagsFoundEventListener(listener: (event: FoundTagsPayload) => void): Subscription {
