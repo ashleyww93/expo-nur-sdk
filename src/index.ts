@@ -39,18 +39,6 @@ export function addTagsFoundEventListener(listener: (event: FoundTagsPayload) =>
   return emitter.addListener<FoundTagsPayload>('onTagsFoundChanged', listener);
 }
 
-
-export function hello(): string {
-  return ExpoNurSdkModule.hello();
-}
-
-
-
-export function fireEventDevice(): string {
-  return ExpoNurSdkModule.fireEventDevice();
-}
-
-
 export function initialize(deviceSpec: string | null): boolean {
   return ExpoNurSdkModule.initialize(deviceSpec);
 }

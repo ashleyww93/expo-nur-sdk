@@ -21,10 +21,6 @@ class ExpoNurSdkModule : Module() {
     // Defines event names that the module can send to JavaScript.
     Events("onDeviceScanStatusUpdate", "onDeviceConnectionChanged", "onTagsFoundChanged")
 
-    // Function("fireEventDevice") {
-    //   this@ExpoNurSdkModule.sendEvent("onDeviceConnectionChanged", bundleOf("isConnected" to true))
-    // }
-
     //Real functions
     Function("initialize") { deviceSpec: String? ->
       val activity = appContext.currentActivity;
