@@ -51,6 +51,8 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
     //device scanning
     private List<NurDeviceSpec> mDeviceList;
     private boolean mDeviceScanning = false;
+    private List<String> allowedCompanyPrefixes = new ArrayList<>();
+    private boolean mShouldReadUsr = false;
 
     //callbacks
     private EventCallbacks mCallbacks;
@@ -110,6 +112,12 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
 
         this.traceContinuousStop();
         this.disconnect();
+        return true;
+    }
+
+    public boolean provideSettings(ArrayList<String> allowedCompanyPrefixes, Boolean readUsr) {
+        this.allowedCompanyPrefixes = allowedCompanyPrefixes;
+        this.mShouldReadUsr = readUsr;
         return true;
     }
 
@@ -252,6 +260,9 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
 
     private void handleInventoryResult() throws Exception {
         synchronized (this.mNurApi.getStorage()) {
+
+            Boolean gs1Only = !this.allowedCompanyPrefixes.isEmpty();
+
             HashMap<String, String> tmp;
             NurTagStorage tagStorage = this.mNurApi.getStorage();
             List<RFIDTag> oldRFIDTagStorage = new ArrayList<>(this.mSeenRFIDTagStorage);
@@ -269,9 +280,28 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                         //This is TDT (TagDataTranslation) library feature.
                         EPCTagEngine engine = new EPCTagEngine(t.getEpcString());
                         //Looks like it is GS1 coded, show pure Identity URI
+                    
                         String gs = engine.buildPureIdentityURI();
-                        mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);
+                        debugToast("gs  " + gs);
+                        String companyPrefix = engine.getSegment(0).toString();
+                        debugToast("companyPrefix  " + companyPrefix);
+                        if(!gs1Only) {
+                            mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);
+                        } else {
+                            if (this.allowedCompanyPrefixes.contains(companyPrefix)) {
+                                mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);   
+                                debugToast("prefix allowed  " + companyPrefix); 
+                            } else {
+                                //prefix not allowed
+                                debugToast("prefix not allowed  " + companyPrefix);
+                                continue;
+                            }
+                        }
                     } catch (Exception ex) {
+                        debugToast("ex  " + ex.getMessage()); 
+                        if(gs1Only) {
+                            continue;
+                        }
                         mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), false, null);
                     }
     
@@ -283,13 +313,17 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                         Log.e("Helper", "Error reading TID bank: " + e.getMessage());
                     }
     
-                    try {
-                        byte[] usrBank1 = this.mNurApi.readTagByEpc(t.getEpc(), t.getEpc().length, BANK_USER, 0, 4);
-                        String usr = NurApi.byteArrayToHexString(usrBank1);
-                        mappedTag.setUsr(usr);
-                        mappedTag.setUsrSupported(true);
-                    } catch(NurApiException e) {
-                        Log.e("Helper", "Error reading USR bank: " + e.getMessage());
+                    if(this.mShouldReadUsr) {
+                        try {
+                            byte[] usrBank1 = this.mNurApi.readTagByEpc(t.getEpc(), t.getEpc().length, BANK_USER, 0, 4);
+                            String usr = NurApi.byteArrayToHexString(usrBank1);
+                            mappedTag.setUsr(usr);
+                            mappedTag.setUsrSupported(true);
+                        } catch(NurApiException e) {
+                            Log.e("Helper", "Error reading USR bank: " + e.getMessage());
+                            mappedTag.setUsrSupported(false);
+                        }
+                    } else {
                         mappedTag.setUsrSupported(false);
                     }
     

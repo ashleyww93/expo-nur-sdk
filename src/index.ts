@@ -54,6 +54,10 @@ export function initialize(deviceSpec: string | null): boolean {
   return ExpoNurSdkModule.initialize(deviceSpec);
 }
 
+export function provideSettings(allowedCompanyPrefixes: string[], readUsr: boolean): boolean {
+  return ExpoNurSdkModule.provideSettings(allowedCompanyPrefixes, readUsr);
+}
+
 export function terminate(): boolean {
   return ExpoNurSdkModule.terminate();
 }

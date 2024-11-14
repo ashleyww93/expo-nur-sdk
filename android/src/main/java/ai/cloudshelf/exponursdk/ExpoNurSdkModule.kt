@@ -64,6 +64,11 @@ class ExpoNurSdkModule : Module() {
       } 
     }
 
+ 
+    Function("provideSettings") { allowedCompanyPrefixes: ArrayList<String>, readUsr: Boolean ->
+      return@Function Helper.getInstance().provideSettings(ArrayList(allowedCompanyPrefixes.toMutableList()), readUsr);
+    }
+
     Function("terminate") {
       return@Function Helper.getInstance().terminate();
     }
