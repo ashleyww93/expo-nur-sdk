@@ -64,14 +64,14 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledFuture;
 
-    private void debugToast(String message) {
-        context.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+    // private void debugToast(String message) {
+    //     context.runOnUiThread(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    //         }
+    //     });
+    // }
 
     public void sendOnDeviceScanStatusUpdate() {
         this.mCallbacks.onDeviceScanStatusUpdate(this.mDeviceList, this.mDeviceScanning);
@@ -235,20 +235,17 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
 
     //device listener
     public void onScanStarted(){
-        debugToast("onDeviceScanStarted");
         this.mDeviceList.clear();
         this.mDeviceScanning = true;
         this.sendOnDeviceScanStatusUpdate();
     }
 
     public void onDeviceFound(NurDeviceSpec device){
-        debugToast("onDeviceFound: " + device.getSpec());
         this.mDeviceList.add(device);
         this.sendOnDeviceScanStatusUpdate();
     }
 
     public void onScanFinished(){
-        debugToast("onScanFinished");
         this.mDeviceScanning = false;
         this.sendOnDeviceScanStatusUpdate();
     }
@@ -284,23 +281,22 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                         //Looks like it is GS1 coded, show pure Identity URI
                     
                         String gs = engine.buildPureIdentityURI();
-                        debugToast("gs  " + gs);
+
                         String companyPrefix = engine.getSegment(0).toString();
-                        debugToast("companyPrefix  " + companyPrefix);
+
                         if(!gs1Only) {
                             mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);
                         } else {
                             if (this.allowedCompanyPrefixes.contains(companyPrefix)) {
                                 mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);   
-                                debugToast("prefix allowed  " + companyPrefix); 
+
                             } else {
                                 //prefix not allowed
-                                debugToast("prefix not allowed  " + companyPrefix);
+
                                 continue;
                             }
                         }
                     } catch (Exception ex) {
-                        debugToast("ex  " + ex.getMessage()); 
                         if(gs1Only) {
                             continue;
                         }
