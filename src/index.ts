@@ -11,15 +11,19 @@ export interface DeviceScanStatusUpdatePayload {
   foundDevices: string[]
   isScanning: boolean,
 }
+export interface RFIDTagGS1Data {
+  fullGS1String: string;
+  companyPrefix: string;
+  itemReference: string;
+  serialNumber: string;
+}
 
 export interface RFIDTag {
-  isGS1Encoded: boolean;
-  gS1String: string | null;
+  gs1Data: RFIDTagGS1Data | null;
   epc: string;
-  rssi: string,
+  rssi: string;
   tid: string | null;
-  usr: string | null,
-  usrSupported: boolean,
+  usr: string | null;
 } 
 
 export interface FoundTagsPayload {

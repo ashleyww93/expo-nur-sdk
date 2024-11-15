@@ -1,23 +1,19 @@
 package ai.cloudshelf.exponursdk;
 
 public class RFIDTag {
-    private Boolean isGS1Encoded;
-    private String gS1String;
+    private RFIDTagGS1Data gs1Data;
     private String epc;
     private int rssi;
     private String tid;
     private String usr;
-    private Boolean usrSupported = false;
 
-    public RFIDTag(String epc, int rssi, Boolean gs1Encoded, String gs1String) {
-        this.isGS1Encoded = gs1Encoded;
-        this.gS1String = gs1String;
+    public RFIDTag(String epc, int rssi) {
         this.epc = epc;
         this.rssi = rssi;
     }
 
     public String getEpc() {
-        return epc;
+        return this.epc;
     }
 
     public void setEpc(String epc) {
@@ -25,7 +21,7 @@ public class RFIDTag {
     }
 
     public int getRssi() {
-        return rssi;
+        return this.rssi;
     }
 
     public void setRssi(int rssi) {
@@ -33,7 +29,7 @@ public class RFIDTag {
     }
 
     public String getTid() {
-        return tid;
+        return this.tid;
     }
 
     public void setTid(String tid) {
@@ -44,23 +40,20 @@ public class RFIDTag {
         return usr;
     }
 
-    public Boolean getUsrSupported() {
-        return usrSupported;
-    }
-
     public void setUsr(String usr) {
         this.usr = usr;
     }
 
-    public void setUsrSupported(Boolean supported) {
-        this.usrSupported = supported;
+
+    public void setGS1Data(RFIDTagGS1Data data) {
+        this.gs1Data = data;
     }
 
     public Boolean getIsGS1Encoded() {
-        return isGS1Encoded;
+        return this.gs1Data != null;
     }
 
-    public String getGS1String() {
-        return gS1String;
+    public RFIDTagGS1Data getGS1Data() {
+        return this.gs1Data;
     }
 }

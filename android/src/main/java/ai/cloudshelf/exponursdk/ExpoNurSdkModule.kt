@@ -45,14 +45,21 @@ class ExpoNurSdkModule : Module() {
 
           override fun onTagsDiscovered(tagsList: kotlin.collections.List<RFIDTag>) {
             val processedTagsList = tagsList.map { tag ->
+
+            val gs1Data = tag.getGS1Data();
+            val gs1DataMap = kotlin.collections.mapOf(
+              "fullGS1String" to gs1Data.fullGS1String,
+              "companyPrefix" to gs1Data.companyPrefix,
+              "itemReference" to gs1Data.itemReference,
+              "serialNumber" to gs1Data.serialNumber,
+            );
+
               kotlin.collections.mapOf(
-                "isGS1Encoded" to tag.getIsGS1Encoded(),
-                "gS1String" to tag.getGS1String(),
+                "gs1Data" to gs1DataMap,
                 "epc" to tag.getEpc(),
                 "rssi" to tag.getRssi().toString(),
                 "tid" to tag.getTid(),
                 "usr" to tag.getUsr(),
-                "usrSupported" to tag.getUsrSupported()
               )
             }
 

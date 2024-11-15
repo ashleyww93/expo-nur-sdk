@@ -63,7 +63,8 @@ export default function App() {
     }
     setDeviceToUse(device);
     ExpoNurSdk.connect(device);
-  }
+  }  
+
 
   return (
     <View style={styles.container}>
@@ -175,11 +176,11 @@ export default function App() {
                   <Text style={{ 
                     padding: 10, 
                     }}>
-                      GS1: {item.isGS1Encoded && item.gS1String ? item.gS1String : 'Not GS1 Encoded'}{"\n"}
+                      GS1: {item.gs1Data ? `${item.gs1Data.fullGS1String} (${item.gs1Data.companyPrefix}) - (${item.gs1Data.itemReference}) - (${item.gs1Data.serialNumber})` : 'Not GS1 Encoded'}{"\n"}
                     EPC: {item.epc}{"\n"}
                     RSSI: {item.rssi}{"\n"}
                     TID: {item.tid}{"\n"}
-                    USR: {item.usrSupported && item.usr ? item.usr : 'Not Supported'}
+                    USR: {item.usr && item.usr ? item.usr : 'Not Supported'}
                   </Text>
                 </TouchableOpacity>
               )}

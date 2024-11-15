@@ -64,14 +64,14 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledFuture;
 
-    // private void debugToast(String message) {
-    //     context.runOnUiThread(new Runnable() {
-    //         @Override
-    //         public void run() {
-    //             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-    //         }
-    //     });
-    // }
+    private void debugToast(String message) {
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     public void sendOnDeviceScanStatusUpdate() {
         this.mCallbacks.onDeviceScanStatusUpdate(this.mDeviceList, this.mDeviceScanning);
@@ -272,8 +272,8 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
 
                 if (mSeenTagStorage.addTag(t)) {
                     //This only fires if we havent seen it before
-                    RFIDTag mappedTag;
-
+                    RFIDTag mappedTag = mappedTag = new RFIDTag(t.getEpcString(), t.getRssi());
+                    
                     try {
                         //Check if tag is GS1 coded. Exception fired if not and plain EPC shown.
                         //This is TDT (TagDataTranslation) library feature.
@@ -281,26 +281,22 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                         //Looks like it is GS1 coded, show pure Identity URI
                     
                         String gs = engine.buildPureIdentityURI();
-
                         String companyPrefix = engine.getSegment(0).toString();
+                        String itemRef = engine.getSegment(1).toString();
+                        String serialNumber = engine.getSegment(2).toString();
 
-                        if(!gs1Only) {
-                            mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);
-                        } else {
-                            if (this.allowedCompanyPrefixes.contains(companyPrefix)) {
-                                mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), true, gs);   
+                        RFIDTagGS1Data gs1Data = new RFIDTagGS1Data(gs, companyPrefix, itemRef, serialNumber);
+                        mappedTag.setGS1Data(gs1Data);
 
-                            } else {
-                                //prefix not allowed
-
-                                continue;
-                            }
+                        if (!this.allowedCompanyPrefixes.contains(companyPrefix)) {
+                            // if prefix is not known then skip over as we dont want to continue;
+                            continue;
                         }
                     } catch (Exception ex) {
                         if(gs1Only) {
+                            // If it errored, then its GS1 encoded, and if we only want GS1 then we skip over...
                             continue;
                         }
-                        mappedTag = new RFIDTag(t.getEpcString(), t.getRssi(), false, null);
                     }
     
                     try {
@@ -316,13 +312,9 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                             byte[] usrBank1 = this.mNurApi.readTagByEpc(t.getEpc(), t.getEpc().length, BANK_USER, 0, 4);
                             String usr = NurApi.byteArrayToHexString(usrBank1);
                             mappedTag.setUsr(usr);
-                            mappedTag.setUsrSupported(true);
                         } catch(NurApiException e) {
                             Log.e("Helper", "Error reading USR bank: " + e.getMessage());
-                            mappedTag.setUsrSupported(false);
                         }
-                    } else {
-                        mappedTag.setUsrSupported(false);
                     }
     
                     this.mSeenRFIDTagStorage.add(mappedTag);
