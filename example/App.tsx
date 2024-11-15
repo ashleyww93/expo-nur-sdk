@@ -45,7 +45,8 @@ export default function App() {
     if(!expoNurSdkInitalized) {
       const init = ExpoNurSdk.initialize(null);
       if(init) {
-        ExpoNurSdk.provideSettings(["0867360217"], true);
+        //0867360217
+        ExpoNurSdk.provideSettings(['0867360217'], true);
       }
       setExpoNurSdkInitalized(init);
     }

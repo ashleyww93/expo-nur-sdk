@@ -273,7 +273,7 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
                 if (mSeenTagStorage.addTag(t)) {
                     //This only fires if we havent seen it before
                     RFIDTag mappedTag = mappedTag = new RFIDTag(t.getEpcString(), t.getRssi());
-                    
+                  
                     try {
                         //Check if tag is GS1 coded. Exception fired if not and plain EPC shown.
                         //This is TDT (TagDataTranslation) library feature.
@@ -287,8 +287,8 @@ public class Helper implements NurDeviceScanner.NurDeviceScannerListener {
 
                         RFIDTagGS1Data gs1Data = new RFIDTagGS1Data(gs, companyPrefix, itemRef, serialNumber);
                         mappedTag.setGS1Data(gs1Data);
-
-                        if (!this.allowedCompanyPrefixes.contains(companyPrefix)) {
+                        
+                        if (!this.allowedCompanyPrefixes.isEmpty() && !this.allowedCompanyPrefixes.contains(companyPrefix)) {
                             // if prefix is not known then skip over as we dont want to continue;
                             continue;
                         }

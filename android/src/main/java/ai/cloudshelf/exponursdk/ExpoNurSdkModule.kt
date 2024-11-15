@@ -47,12 +47,16 @@ class ExpoNurSdkModule : Module() {
             val processedTagsList = tagsList.map { tag ->
 
             val gs1Data = tag.getGS1Data();
-            val gs1DataMap = kotlin.collections.mapOf(
-              "fullGS1String" to gs1Data.fullGS1String,
-              "companyPrefix" to gs1Data.companyPrefix,
-              "itemReference" to gs1Data.itemReference,
-              "serialNumber" to gs1Data.serialNumber,
-            );
+            var gs1DataMap: Map<String, String>? = null;
+            
+            if (gs1Data != null) {
+              gs1DataMap = kotlin.collections.mapOf(
+                "fullGS1String" to gs1Data.fullGS1String,
+                "companyPrefix" to gs1Data.companyPrefix,
+                "itemReference" to gs1Data.itemReference,
+                "serialNumber" to gs1Data.serialNumber,
+              )
+            }
 
               kotlin.collections.mapOf(
                 "gs1Data" to gs1DataMap,

@@ -1,6 +1,6 @@
 {
   "name": "expo-nur-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "An Expo plugin to bring Nordic SDK to the managed workflow",
   "main": "build/index.js",
   "types": "build/index.d.ts",
